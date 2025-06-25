@@ -1,12 +1,23 @@
+/// Reservation Bounded Context
+using Microsoft.OpenApi.Models;
+using pc24395u202312031.API.Hr.Application.Internal.CommandServices;
+using pc24395u202312031.API.Hr.Domain.Repositories;
+using pc24395u202312031.API.Hr.Domain.Services;
+using pc24395u202312031.API.Hr.Infrastructure.Persistence.EFC.Repositories;
 
+///
 using pc24395u202312031.API.Shared.Infrastructure.Interfaces.ASP.Configuration;
 using pc24395u202312031.API.Shared.Infrastructure.Persistence.EFC.Configuration;
+using pc24395u202312031.API.Shared.Domain.Repositories;
+using pc24395u202312031.API.Shared.Infrastructure.Persistence.EFC.Repositories;
+
+
 using Cortex.Mediator.Behaviors;
 using Cortex.Mediator.Commands;
 using Cortex.Mediator.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using pc24395u202312031.API.Shared.Domain.Repositories;
-using pc24395u202312031.API.Shared.Infrastructure.Persistence.EFC.Repositories;
+
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +26,31 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddControllers(options => options.Conventions.Add(new KebabCaseRouteNamingConvention()));
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(
+    c =>
+    {
+        c.SwaggerDoc("v1",
+            new OpenApiInfo
+            {
+                Title = "Reservations API",
+                Version = "v1",
+                Description = "Reservations Platform API",
+                TermsOfService = new Uri("https://reservation.com/tos"),
+                Contact = new OpenApiContact
+                {
+                    Name = "u202312031"
+                },
+                License = new OpenApiLicense
+                {
+                    Name = "Apache 2.0",
+                    Url = new Uri("https://www.apache.org/licenses/LICENSE-2.0.html")
+                }
+            });
+        c.EnableAnnotations();
+    });
+
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -48,7 +84,11 @@ builder.Services.AddSwaggerGen(options => { options.EnableAnnotations(); });
 // Shared Bounded Context
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// -- bounded context
+// Reservation bounded context
+
+builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
+builder.Services.AddScoped<IReservationCommandService, ReservationCommandService>();
+
 
 // Mediator Configuration
 
